@@ -1,0 +1,28 @@
+{
+  "type": "module",
+  "name": "nodeexercises",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Kareem Idris",
+  "license": "ISC",
+  "dependencies": {
+    "@fastify/cors": "^8.2.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.3",
+    "esm": "^3.2.25",
+    "express": "^4.18.2",
+    "fastify": "^4.12.0",
+    "fs": "^0.0.1-security",
+    "got": "^12.5.3",
+    "graphql": "^16.6.0",
+    "mercurius": "^12.0.0",
+    "moment": "^2.29.4",
+    "mongodb": "^4.14.0",
+    "socket.io": "^4.6.1",
+    "yargs": "^17.6.2"
+  }
+}
