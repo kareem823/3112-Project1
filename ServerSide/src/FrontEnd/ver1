@@ -1,0 +1,1011 @@
+
+
+/**
+ * 
+ * ver1
+ * 
+ * 
+import { useState, useEffect } from "react";
+import io from "socket.io-client";
+import {
+  Box,
+TextField,
+FormHelperText,
+ListItemText,
+Button,
+Typography,
+ThemeProvider,
+Card,
+CardHeader,
+AppBar,
+Toolbar,
+IconButton,
+Dialog,
+DialogTitle,
+DialogContent,
+DialogContentText, DialogActions, CardContent,
+RadioGroup, FormControlLabel, Radio, FormControl, FormLabel,
+} from "@mui/material";
+//import { ThemeProvider, AppBar, Toolbar, Typography, IconButton, Box, Button, List, ListItem, ListItemText, Card, CardHeader, CardContent, Dialog, DialogTitle, DialogContent, DialogContentText, TextField, DialogActions, FormControl, FormLabel, RadioGroup, FormControlLabel, Radio } from '@mui/material';
+import { List, ListItem } from "@mui/material";
+import { PeopleOutline } from "@mui/icons-material";
+import "../App.css";
+import ChatLogo from "../FrontEnd/ChatLogo.jpg";
+import theme from "./theme.js";
+//import { handleNewTeamMemberEmailChange } from "./team.js";
+import { Add } from '@mui/icons-material';
+
+const socket = io("http://localhost:5000", {
+  transports: ["websocket", "polling"]
+});
+
+const Assignment = () => {
+
+  const [projects, setProjects] = useState([]);
+  const [selectedProject, setSelectedProject] = useState(null);
+  const [projectFormOpen, setProjectFormOpen] = useState(false);
+  const [teamMemberFormOpen, setTeamMemberFormOpen] = useState(false);
+  const [userStoryFormOpen, setUserStoryFormOpen] = useState(false);
+  const [subtaskFormOpen, setSubtaskFormOpen] = useState(false);
+  const [sprintFormOpen, setSprintFormOpen] = useState(false);
+  const [newProjectName, setNewProjectName] = useState("");
+  const [newProjectDescription, setNewProjectDescription] = useState("");
+  const [newTeamMemberName, setNewTeamMemberName] = useState("");
+  const [newUserStoryTitle, setNewUserStoryTitle] = useState("");
+  const [newUserStoryDescription, setNewUserStoryDescription] = useState("");
+  const [newSubtaskTitle, setNewSubtaskTitle] = useState("");
+  const [newSubtaskDescription, setNewSubtaskDescription] = useState("");
+  const [newSubtaskAssignee, setNewSubtaskAssignee] = useState("");
+  const [newSprintName, setNewSprintName] = useState("");
+  const [newSprintGoal, setNewSprintGoal] = useState("");
+  const [newSprintStartDate, setNewSprintStartDate] = useState("");
+  const [newSprintEndDate, setNewSprintEndDate] = useState("");
+  const [newSprintStatus, setNewSprintStatus] = useState("");
+  const [newTeamMemberEmail, setNewTeamMemberEmail] = useState("");
+  const [userStoryFormMode, setUserStoryFormMode] = useState("create");
+  const [selectedUserStory, setSelectedUserStory] = useState(null);
+  const [selectedSprint, setSelectedSprint] = useState(null);
+  const [sprintFormMode, setSprintFormMode] = useState("create");
+  
+  
+  useEffect(() => {
+    // Load all projects from the server
+    fetch("/api/projects")
+      .then(res => {
+  
+        return res.json();
+      })
+      .then(data => setProjects(data))
+      .catch(error => {
+        console.error(error);
+      });
+  
+    // Listen to project created event
+    socket.on("projectCreated", project => {
+      setProjects([...projects, project]);
+    });
+  
+    // Listen to team member added event
+    socket.on("teamMemberAdded", project => {
+      setSelectedProject(project);
+    });
+  
+    // Listen to user story updated event
+    socket.on("userStoryUpdated", project => {
+      setSelectedProject(project);
+    });
+  
+    // Listen to subtask updated event
+    socket.on("subtaskUpdated", project => {
+      setSelectedProject(project);
+    });
+  
+    // Listen to sprint completed event
+    socket.on("sprintCompleted", project => {
+      setSelectedProject(project);
+    });
+  
+    // Listen to user stories copied event
+    socket.on("userStoriesCopied", project => {
+      setSelectedProject(project);
+    });
+  }, []);
+  
+  
+  
+  const handleProjectFormOpen = () => {
+  setProjectFormOpen(true);
+  };
+  
+  const handleProjectFormClose = () => {
+  setProjectFormOpen(false);
+  };
+  
+  const handleTeamMemberFormOpen = () => {
+  setTeamMemberFormOpen(true);
+  };
+  
+  const handleTeamMemberFormClose = () => {
+  setTeamMemberFormOpen(false);
+  };
+  
+  const handleUserStoryFormClose = () => {
+  setUserStoryFormOpen(false);
+  };
+  
+  const handleSubtaskFormClose = () => {
+  setSubtaskFormOpen(false);
+  };
+  
+  
+  const handleSprintFormClose = () => {
+  setSprintFormOpen(false);
+  };
+  
+  const handleNewProjectNameChange = (event) => {
+  setNewProjectName(event.target.value);
+  };
+  
+  const handleNewProjectDescriptionChange = (event) => {
+  setNewProjectDescription(event.target.value);
+  };
+  
+  const handleNewTeamMemberNameChange = (event) => {
+  setNewTeamMemberName(event.target.value);
+  };
+  
+  const handleNewUserStoryTitleChange = (event) => {
+  setNewUserStoryTitle(event.target.value);
+  };
+  
+  const handleNewUserStoryDescriptionChange = (event) => {
+  setNewUserStoryDescription(event.target.value);
+  };
+  
+  const handleNewSubtaskTitleChange = (event) => {
+  setNewSubtaskTitle(event.target.value);
+  };
+  
+  const handleNewSubtaskDescriptionChange = (event) => {
+  setNewSubtaskDescription(event.target.value);
+  };
+  
+  const handleNewSubtaskAssigneeChange = (event) => {
+  setNewSubtaskAssignee(event.target.value);
+  };
+  
+  const handleNewSprintNameChange = ( 
+  event) => {
+  setNewSprintName(event.target.value);
+  };
+  
+  const handleNewSprintGoalChange = (event) => {
+  setNewSprintGoal(event.target.value);
+  };
+  
+  const handleNewSprintStartDateChange = (event) => {
+  setNewSprintStartDate(event.target.value);
+  };
+  
+  const handleNewSprintEndDateChange = (event) => {
+  setNewSprintEndDate(event.target.value);
+  };
+  
+  const handleNewSprintStatusChange = (event) => {
+  setNewSprintStatus(event.target.value);
+  };
+  
+  const handleProjectCreate = () => {
+  const newProject = {
+  name: newProjectName,
+  description: newProjectDescription,
+  team: [],
+  sprints: [],
+  userStories: []
+  };
+  socket.emit("createProject", newProject);
+  setNewProjectName("");
+  setNewProjectDescription("");
+  handleProjectFormClose();
+  };
+  
+  
+  const handleTeamMemberAdd = () => {
+    if (!selectedProject) {
+      return;
+    }
+  
+    const maxId = Math.max(
+      ...selectedProject.team.map((member) => (member ? member.id : -1))
+    );
+    const newTeamMember = {
+      name: newTeamMemberName,
+      role: "",
+      subtasks: []
+      };
+      socket.emit("addTeamMember", {projectId: selectedProject.id, member: newTeamMember});
+      setNewTeamMemberName("");
+      handleTeamMemberFormClose();};
+  
+  
+  const handleUserStoryUpdate = (userStory) => {
+  socket.emit("updateUserStory", {projectId: selectedProject.id, userStory});
+  };
+  
+  const handleSprintPlan = () => {
+  const newSprint = {
+  name: newSprintName,
+  goal: newSprintGoal,
+  startDate: newSprintStartDate,
+  endDate: newSprintEndDate,
+  status: newSprintStatus,
+  team: [],
+  userStories: []
+  };
+  socket.emit("planSprint", {projectId: selectedProject.id, sprint: newSprint});
+  setNewSprintName("");
+  setNewSprintGoal("");
+  setNewSprintStartDate("");
+  setNewSprintEndDate("");
+  setNewSprintStatus("");
+  handleSprintFormClose();
+  };
+  
+  const handleNewTeamMemberEmailChange = (event) => {
+    setNewTeamMemberEmail(event.target.value);
+  };
+  
+  const handleUserStoryCreate = () => {
+    const newUserStory = {
+      title: newUserStoryTitle,
+      description: newUserStoryDescription,
+      subtasks: [],
+    };
+    socket.emit("createUserStory", { projectId: selectedProject.id, userStory: newUserStory });
+    setNewUserStoryTitle("");
+    setNewUserStoryDescription("");
+    handleUserStoryFormClose();
+  };
+  
+  const handleSubtaskCreate = () => {
+    const newSubtask = {
+      title: newSubtaskTitle,
+      description: newSubtaskDescription,
+      assignee: newSubtaskAssignee,
+      status: "TODO",
+    };
+    socket.emit("createSubtask", {
+      projectId: selectedProject.id,
+      userStoryId: selectedUserStory.id,
+      subtask: newSubtask,
+    });
+    setNewSubtaskTitle("");
+    setNewSubtaskDescription("");
+    setNewSubtaskAssignee("");
+    handleSubtaskFormClose();
+  };
+  
+    // Add the following two functions:
+    const handleUserStoryEdit = (story) => {
+      if (!story) return;
+      setUserStoryFormMode("update");
+      setSelectedUserStory(story);
+      setNewUserStoryTitle(story.title);
+      setNewUserStoryDescription(story.description);
+      setUserStoryFormOpen(true);
+    };
+    
+    function handleSprintSelect(sprint) {
+      if (!sprint) return;
+      handleSprintEdit(sprint);
+    }
+    
+    
+    function handleSprintEdit(sprint) {
+      setSelectedSprint(sprint);
+      setSprintFormMode("edit");
+      setNewSprintName(sprint.name);
+      setNewSprintGoal(sprint.goal);
+      setNewSprintStartDate(sprint.startDate);
+      setNewSprintEndDate(sprint.endDate);
+      setNewSprintStatus(sprint.status);
+      handleSprintFormOpen();
+    }
+    
+  // Add the following return statement at the end of the Assignment component, before the closing brace and 'export default Assignment;'
+  return (
+    <ThemeProvider theme={theme}>
+      <div className="App">
+        <AppBar position="static">
+          <Toolbar>
+            <Typography variant="h6" className="App-title">
+              Assignment Manager
+            </Typography>
+            <IconButton
+              edge="end"
+              color="inherit"
+              aria-label="people"
+              onClick={handleTeamMemberFormOpen}
+            >
+              <PeopleOutline />
+            </IconButton>
+          </Toolbar>
+        </AppBar>
+        <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+          <Button variant="contained" color="primary" onClick={handleProjectFormOpen}>
+            New Project
+          </Button>
+          <List>
+            {projects.map((project, index) => (
+              <ListItem
+                button
+                key={index}
+                onClick={() => setSelectedProject(project)}
+              >
+                <ListItemText primary={project.name} />
+              </ListItem>
+            ))}
+          </List>
+          {selectedProject && (
+            <Card>
+              <CardHeader title={selectedProject.name} subheader={selectedProject.description} />
+              <CardContent>
+                <Typography variant="h6">Team Members</Typography>
+  <List>
+    {selectedProject.team.map((member, index) => (
+      <ListItem key={index}>
+        <ListItemText primary={member.name} secondary={member.email} />
+      </ListItem>
+    ))}
+  </List>
+  
+  <Button variant="contained" color="primary" onClick={() => handleUserStoryEdit(null)}>
+  User Stories
+</Button>
+{selectedUserStory && (
+  <Card>
+    <CardContent>
+      <Typography variant="h6">User Story</Typography>
+      <List>
+        <ListItem>
+          <ListItemText primary={selectedUserStory.title} secondary={selectedUserStory.description} />
+        </ListItem>
+      </List>
+    </CardContent>
+  </Card>
+)}
+<Button variant="contained" color="primary" onClick={() => handleSprintSelect(null)}>
+  Sprints
+</Button>
+{selectedSprint && (
+  <Card>
+    <CardContent>
+      <Typography variant="h6">Sprint</Typography>
+      <List>
+        <ListItem>
+          <ListItemText
+            primary={selectedSprint.name}
+            secondary={`Goal: ${selectedSprint.goal}, Status: ${selectedSprint.status}`}
+          />
+        </ListItem>
+      </List>
+    </CardContent>
+  </Card>
+)}
+
+  
+              </CardContent>
+            </Card>
+          )}
+        </Box>
+        <Dialog open={projectFormOpen} onClose={handleProjectFormClose}>
+          <DialogTitle>Create a new project</DialogTitle>
+          <DialogContent>
+            <DialogContentText>
+              Please enter the project name and description.
+            </DialogContentText>
+            <TextField
+              autoFocus
+              margin="dense"
+              id="name"
+              label="Project Name"
+              fullWidth
+              value={newProjectName}
+              onChange={handleNewProjectNameChange}
+            />
+            <TextField
+              margin="dense"
+              id="description"
+              label="Project Description"
+              fullWidth
+              value={newProjectDescription}
+              onChange={handleNewProjectDescriptionChange}
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleProjectFormClose} color="primary">
+              Cancel
+            </Button>
+            <Button onClick={handleProjectCreate} color="primary">
+              Create
+            </Button>
+          </DialogActions>
+        </Dialog>
+  
+        <Dialog open={teamMemberFormOpen} onClose={handleTeamMemberFormClose}>
+          <DialogTitle>Add a team member</DialogTitle>
+          <DialogContent>
+            <DialogContentText>
+              Please enter the team member's name and email address.
+            </DialogContentText>
+            <TextField
+              autoFocus
+              margin="dense"
+              id="name"
+              label="Name"
+              fullWidth
+              value={newTeamMemberName}
+              onChange={handleNewTeamMemberNameChange}
+            />
+            <TextField
+              margin="dense"
+              id="email"
+              label="Email Address"
+              type="email"
+              fullWidth
+              value={newTeamMemberEmail}
+              onChange={handleNewTeamMemberEmailChange}
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleTeamMemberFormClose} color="primary">
+              Cancel
+            </Button>
+            <Button onClick={handleTeamMemberAdd} color="primary">
+              Add
+            </Button>
+          </DialogActions>
+        </Dialog>
+  
+        
+        <Dialog open={userStoryFormOpen} onClose={handleUserStoryFormClose}>
+  
+          <DialogTitle>{userStoryFormMode === "create" ? "Create a new user story" : "Update user story"}</DialogTitle>
+          <DialogContent>
+            <DialogContentText>
+              Please enter the user story title and description.
+            </DialogContentText>
+            <TextField
+              autoFocus
+              margin="dense"
+              id="title"
+              label="User Story Title"
+              fullWidth
+              value={newUserStoryTitle}
+              onChange={handleNewUserStoryTitleChange}
+            />
+            <TextField
+              margin="dense"
+              id="description"
+              label="User Story Description"
+              fullWidth
+              value={newUserStoryDescription}
+              onChange={handleNewUserStoryDescriptionChange}
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleUserStoryFormClose} color="primary">
+              Cancel
+            </Button>
+            <Button onClick={userStoryFormMode === "create" ? handleUserStoryCreate : handleUserStoryUpdate} color="primary">
+              {userStoryFormMode === "create" ? "Create" : "Update"}
+            </Button>
+          </DialogActions>
+        </Dialog>
+  
+        
+  <Dialog open={subtaskFormOpen} onClose={handleSubtaskFormClose}>
+    <DialogTitle>Create a new subtask</DialogTitle>
+    <DialogContent>
+      <DialogContentText>
+        Please enter the subtask title, description, and assignee.
+      </DialogContentText>
+      <TextField
+        autoFocus
+        margin="dense"
+        id="title"
+        label="Subtask Title"
+        fullWidth
+        value={newSubtaskTitle}
+        onChange={handleNewSubtaskTitleChange}
+      />
+      <TextField
+        margin="dense"
+        id="description"
+        label="Subtask Description"
+        fullWidth
+        value={newSubtaskDescription}
+        onChange={handleNewSubtaskDescriptionChange}
+      />
+      <FormControl fullWidth margin="normal">
+        <FormLabel>Assignee</FormLabel>
+        <RadioGroup
+          row
+          aria-label="assignee"
+          name="assignee"
+          value={newSubtaskAssignee}
+          onChange={handleNewSubtaskAssigneeChange}
+        >
+          {selectedProject &&
+            selectedProject.team.map((member, index) => (
+              <FormControlLabel
+                key={index}
+                value={member.name}
+                control={<Radio />}
+                label={member.name}
+              />
+            ))}
+        </RadioGroup>
+      </FormControl>
+    </DialogContent>
+    <DialogActions>
+      <Button onClick={handleSubtaskFormClose} color="primary">
+        Cancel
+      </Button>
+      <Button onClick={handleSubtaskCreate} color="primary">
+        Create
+      </Button>
+    </DialogActions>
+  </Dialog>
+  
+  
+  <Dialog open={sprintFormOpen} onClose={handleSprintFormClose}>
+    <DialogTitle>Plan a new sprint</DialogTitle>
+    <DialogContent>
+      <DialogContentText>
+        Please enter the sprint name, goal, start date, end date, and status.
+      </DialogContentText>
+      <TextField
+        autoFocus
+        margin="dense"
+        id="name"
+        label="Sprint Name"
+        fullWidth
+        value={newSprintName}
+        onChange={handleNewSprintNameChange}
+      />
+      <TextField
+        margin="dense"
+        id="goal"
+        label="Sprint Goal"
+        fullWidth
+        value={newSprintGoal}
+        onChange={handleNewSprintGoalChange}
+      />
+      <TextField
+        margin="dense"
+        id="startDate"
+        label="Start Date"
+        type="date"
+        fullWidth
+        value={newSprintStartDate}
+        onChange={handleNewSprintStartDateChange}
+        InputLabelProps={{
+          shrink: true,
+        }}
+      />
+      <TextField
+        margin="dense"
+        id="endDate"
+        label="End Date"
+        type="date"
+        fullWidth
+        value={newSprintEndDate}
+        onChange={handleNewSprintEndDateChange}
+        InputLabelProps={{
+          shrink: true,
+        }}
+      />
+      <FormControl fullWidth margin="normal">
+        <FormLabel>Status</FormLabel>
+        <RadioGroup
+          row
+          aria-label="status"
+          name="status"
+          value={newSprintStatus}
+          onChange={handleNewSprintStatusChange}
+        >
+          <FormControlLabel
+            value="Not Started"
+            control={<Radio />}
+            label="Not Started"
+          />
+          <FormControlLabel
+            value="In Progress"
+            control={<Radio />}
+            label="In Progress"
+          />
+          <FormControlLabel
+            value="Completed"
+            control={<Radio />}
+            label="Completed"
+          />
+        </RadioGroup>
+      </FormControl>
+    </DialogContent>
+    <DialogActions>
+      <Button onClick={handleSprintFormClose} color="primary">
+        Cancel
+      </Button>
+      <Button onClick={handleSprintPlan} color="primary">
+        Plan
+      </Button>
+    </DialogActions>
+  </Dialog>
+  
+  
+      </div>
+    </ThemeProvider>
+  );
+      };
+
+ * 
+ */
+
+
+      
+
+
+
+
+
+
+/*v1
+import { useState, useEffect } from "react";
+import io from "socket.io-client";
+import {
+  Box,
+TextField,
+FormHelperText,
+ListItemText,
+Button,
+Typography,
+ThemeProvider,
+Card,
+CardHeader,
+AppBar,
+Toolbar,
+IconButton,
+Dialog,
+DialogTitle,
+DialogContent,
+DialogContentText, DialogActions, CardContent,
+RadioGroup, FormControlLabel, Radio, FormControl, FormLabel,
+
+Table,
+TableHead,
+TableRow,
+TableCell,
+TableBody,
+} from "@mui/material";
+//import { ThemeProvider, AppBar, Toolbar, Typography, IconButton, Box, Button, List, ListItem, ListItemText, Card, CardHeader, CardContent, Dialog, DialogTitle, DialogContent, DialogContentText, TextField, DialogActions, FormControl, FormLabel, RadioGroup, FormControlLabel, Radio } from '@mui/material';
+import { List, ListItem } from "@mui/material";
+import { PeopleOutline } from "@mui/icons-material";
+import "../App.css";
+import ChatLogo from "../FrontEnd/ChatLogo.jpg";
+import theme from "./theme.js";
+//import { handleNewTeamMemberEmailChange } from "./team.js";
+import { Add } from '@mui/icons-material';
+import { saveAs } from "file-saver";
+import * as XLSX from "xlsx";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
+
+
+const socket = io("http://localhost:5000", {
+  transports: ["websocket", "polling"]
+});
+
+const Assignment = () => {
+
+  const [projects, setProjects] = useState([]);
+  const [selectedProject, setSelectedProject] = useState(null);
+
+  const [newUserName, setnewUserName] = useState("");
+  const [newProjectDescription, setNewProjectDescription] = useState("");
+
+  const [showCard, setShowCard] = useState(false);
+  const [projectTitle, setProjectTitle] = useState("");
+  const [tableRows, setTableRows] = useState(6);
+  const [tableColumns, setTableColumns] = useState(8);
+  const [concerns, setConcerns] = useState("Enter concerns");
+  
+  useEffect(() => {
+    socket.on("projects", (projects) => {
+      setProjects(projects);
+    });
+  
+    return () => {
+      socket.off("projects");
+    };
+  }, []);
+  
+  
+  const handlenewUserNameChange = (event) => {
+  setnewUserName(event.target.value);
+  };
+  
+      const [open, setOpen] = useState(false);
+    
+      const handleOpen = () => {
+        setOpen(true);
+      };
+    
+      const handleClose = () => {
+        setOpen(false);
+      };
+    
+      const handleCreateProject = () => {
+        // Create the project using the newUserName and newProjectDescription state variables
+        const newProject = {
+          name: newUserName,
+          description: newProjectDescription,
+          team: [],
+          sprints: [],
+          userStories: []
+        };
+        socket.emit("createProject", newProject);
+        setnewUserName("");
+        setNewProjectDescription("");
+        handleClose();
+      };
+    
+
+      const toggleCardVisibility = () => {
+        setShowCard(!showCard);
+      };
+    
+
+    
+    
+      const handleTitleChange = (event) => {
+        setProjectTitle(event.target.value);
+      };
+    
+      const handleConcernsChange = (event) => {
+        setConcerns(event.target.value);
+      };
+    
+      const handleRowChange = (event) => {
+        setTableRows(parseInt(event.target.value));
+      };
+    
+      const handleColumnChange = (event) => {
+        setTableColumns(parseInt(event.target.value));
+      };
+    
+      const downloadAsPDF = () => {
+        const table = document.getElementById("table-to-export");
+        const tempTable = table.cloneNode(true);
+        const inputs = tempTable.getElementsByTagName("input");
+        for (let input of inputs) {
+          const value = input.value;
+          const parentCell = input.parentElement;
+          parentCell.textContent = value;
+          input.remove();
+        }
+        const doc = new jsPDF();
+      
+        // Add student name(s) and project title to the PDF
+        doc.setFontSize(16);
+        doc.text("Student Name(s): " + newUserName, 10, 20);
+        doc.text("Project Title: " + projectTitle, 10, 30);
+      
+        // Use the temporary table for the PDF export
+        doc.autoTable({
+          html: tempTable,
+          startY: 40,
+          theme: 'grid',
+          alternateRowColor: { r: 240, g: 240, b: 240 }
+        });
+        doc.save("table.pdf");
+      };
+      
+    
+      
+      const exportToXLSX = (filename, table) => {
+        const wb = XLSX.utils.table_to_book(table, { sheet: "Sheet1" });
+        XLSX.writeFile(wb, `${filename}.xlsx`);
+      };
+      
+      const exportToHTML = (filename, table) => {
+        const tableHTML = table.outerHTML;
+        const fileContent = `<!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>${filename}</title>
+      </head>
+      <body>
+        ${tableHTML}
+      </body>
+      </html>`;
+        const blob = new Blob([fileContent], { type: "text/html;charset=utf-8" });
+        saveAs(blob, `${filename}.html`);
+      };
+      
+      const createExportTable = (concerns) => {
+        const table = document.getElementById("table-to-export").cloneNode(true);
+        const inputs = table.getElementsByTagName("input");
+      
+        for (let input of inputs) {
+          const value = input.value;
+          const parentCell = input.parentElement;
+          parentCell.textContent = value;
+          input.remove();
+        }
+      
+        const newRow = table.insertRow(-1);
+        const newCell = newRow.insertCell(0);
+        newCell.colSpan = table.rows[0].cells.length;
+        newCell.innerHTML = `Concerns: ${concerns}`;
+      
+        return table;
+      };
+      
+      // ... other code
+      
+      const downloadFiles = () => {
+        const table = createExportTable(concerns);
+        const filename = `${projectTitle}_table`;
+      
+        downloadAsPDF(filename, table);
+        exportToXLSX(filename, table);
+        exportToHTML(filename, table);
+      };
+      
+      
+    
+      // Generate the table
+      const generateTable = () => {
+        const rows = [];
+    
+        for (let i = 0; i < tableRows; i++) {
+          const cells = [];
+    
+          for (let j = 0; j < tableColumns; j++) {
+            cells.push(
+              <TableCell key={j}>
+                <TextField
+                  id={`cell-${i}-${j}`}
+                  defaultValue={`Cell ${i + 1}-${j + 1}`}
+                />
+              </TableCell>
+            );
+          }
+    
+          rows.push(<TableRow key={i}>{cells}</TableRow>);
+        }
+    
+        return (
+          <Table id="table-to-export">
+            <TableHead>
+              <TableRow>
+                {Array.from({ length: tableColumns }).map((_, index) => (
+                  <TableCell key={index}>
+                    <TextField
+                      id={`column-title-${index}`}
+                      defaultValue={`Column ${index + 1}`}
+                    />
+                  </TableCell>
+                ))}
+              </TableRow>
+            </TableHead>
+            <TableBody>{rows}</TableBody>
+          </Table>
+        );
+      };
+
+
+      return (
+        <Card>
+          <CardHeader
+            title="Project Manager"
+            avatar={<PeopleOutline />}
+            action={
+              <>
+                <IconButton onClick={handleOpen}>
+                  <Add />
+                </IconButton>
+                <Dialog open={open} onClose={handleClose}>
+                  <DialogTitle>Users</DialogTitle>
+                  <DialogContent>
+                    <DialogContentText>
+                      Enter your name
+                    </DialogContentText>
+                    <TextField
+                      autoFocus
+                      margin="dense"
+                      id="name"
+                      label="Name"
+                      type="text"
+                      fullWidth
+                      value={newUserName}
+                      onChange={handlenewUserNameChange}
+                    />
+                  </DialogContent>
+                  <DialogActions>
+                    <Button onClick={handleClose}>Cancel</Button>
+                    <Button onClick={handleCreateProject}>Create</Button>
+                  </DialogActions>
+                </Dialog>
+              </>
+            }
+          />
+          <List>
+            {projects.map((project) => (
+              <ListItem
+                key={project.id}
+                button
+                selected={selectedProject && selectedProject.id === project.id}
+                onClick={() => setSelectedProject(project)}
+              >
+                <ListItemText primary={project.name} />
+              </ListItem>
+            ))}
+            <div>
+              <Button variant="contained" color="primary" onClick={toggleCardVisibility}>
+                Create a new project
+              </Button>
+              {showCard && (
+                <Card>
+                  <CardContent>
+                    <Typography variant="h5">
+                      <TextField
+                        label="Project Title"
+                        value={projectTitle}
+                        onChange={handleTitleChange}
+                      />
+                    </Typography>
+                    <TextField
+                      label="Rows"
+                      type="number"
+                      value={tableRows}
+                      onChange={handleRowChange}
+                      inputProps={{ min: 1 }}
+                    />
+                    <TextField
+                      label="Columns"
+                      type="number"
+                      value={tableColumns}
+                      onChange={handleColumnChange}
+                      inputProps={{ min: 1 }}
+                    />
+                    {generateTable()}
+                    <TextField
+                      label="Enter concerns"
+                      value={concerns}
+                      onChange={handleConcernsChange}
+                      style={{ marginTop: "1rem", width: "100%" }}
+                    />
+                    <Button
+                      variant="contained"
+                      color="secondary"
+                      onClick={downloadFiles}
+                      style={{ marginTop: "1rem" }}
+                    >
+                      Download Files
+                    </Button>
+                    <div style={{ marginTop: "1rem" }}>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          </List>
+        </Card>
+      );
+};
+      export default Assignment;
+      */
