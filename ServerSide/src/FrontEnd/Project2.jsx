@@ -54,7 +54,7 @@ const Assignment = () => {
   const [showCard, setShowCard] = useState(false);
   const [projectTitle, setProjectTitle] = useState("");
   const [tableRows, setTableRows] = useState(6);
-  const [tableColumns, setTableColumns] = useState(8);
+  const [tableColumns, setTableColumns] = useState(5);
   const [concerns, setConcerns] = useState("Enter concerns");
   
   /*
@@ -113,7 +113,7 @@ const Assignment = () => {
           setSelectedProject(updatedProject);
           setProjectTitle(updatedProject.projectTitle || "");
           setTableRows(updatedProject.tableRows || 6);
-          setTableColumns(updatedProject.tableColumns || 8);
+          setTableColumns(updatedProject.tableColumns || 5);
           setConcerns(updatedProject.concerns || "Enter concerns");
         }
       }
@@ -130,7 +130,7 @@ const Assignment = () => {
         setSelectedProject(updatedProject);
         setProjectTitle(updatedProject.projectTitle || "");
         setTableRows(updatedProject.tableRows || 6);
-        setTableColumns(updatedProject.tableColumns || 8);
+        setTableColumns(updatedProject.tableColumns || 5);
         setConcerns(updatedProject.concerns || "Enter concerns");
       }
     });
@@ -287,12 +287,13 @@ const Assignment = () => {
       
       
     
+
       const generateTable = () => {
         const rows = [];
-      
+
         for (let i = 0; i < tableRows; i++) {
           const cells = [];
-      
+
           for (let j = 0; j < tableColumns; j++) {
             cells.push(
               <TableCell key={j}>
@@ -303,10 +304,18 @@ const Assignment = () => {
               </TableCell>
             );
           }
-      
+
           rows.push(<TableRow key={i}>{cells}</TableRow>);
         }
-      
+
+        const columnTitles = [
+          "User Stories",
+          "Priority",
+          "Team Members",
+          "Actual Hours",
+          "Estimated hours to complete"
+        ];
+
         return (
           <div>
             <Table id="table-to-export">
@@ -316,7 +325,7 @@ const Assignment = () => {
                     <TableCell key={index}>
                       <TextField
                         id={`column-title-${index}`}
-                        defaultValue={`Column ${index + 1}`}
+                        defaultValue={columnTitles[index] || `Column ${index + 1}`}
                       />
                     </TableCell>
                   ))}
@@ -330,6 +339,7 @@ const Assignment = () => {
           </div>
         );
       };
+
       
 
       return (
